@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استمارة PDM للحقيبة المدرسية والقرطاسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --green:  #1a3d6b; --green-l: #2563ab; --green-p: #e8f0fa;
+  --blue:   #1d4e89; --blue-l:  #2563ab; --blue-p:  #e8f0fa;
+  --brown:  #7b3f00; --brown-l: #a05a20; --brown-p: #fdf0e6;
+  --purple: #6b2d8b; --purple-l:#8b3dab; --purple-p:#f5eafa;
+  --orange: #b5451b; --orange-l:#d4622a; --orange-p:#fdf0eb;
+  --dark: #1a1a1a; --gray: #6b7280; --gray-l: #f3f4f6;
+  --white: #fff; --border: #d1d5db; --error: #dc2626;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Cairo',sans-serif;
+  background: linear-gradient(160deg,#f0f3f7,#eef3fa,#f5f0fb);
+  min-height:100vh; color:var(--dark); padding:28px 14px;
+}
+.page-header { text-align:center; margin-bottom:36px; }
+.logo { width:150px; height:150px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:28px; margin-bottom:10px;}
+h1 { font-size:26px; font-weight:900; color:var(--green); margin-bottom:4px; }
+.subtitle { font-size:13px; color:var(--gray); }
+.divider { width:80px; height:3px; background:linear-gradient(90deg,var(--green),#c9a227);
+  border-radius:2px; margin:12px auto 0; }
+
+form { max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:24px; }
+
+.card { background:var(--white); border-radius:18px; overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.07); border:1px solid rgba(0,0,0,.06); }
+.card-head { padding:14px 24px; display:flex; align-items:center; gap:10px; color:#fff; }
+.card-head .ico { font-size:20px; }
+.card-head .ttl { font-size:16px; font-weight:700; }
+.card-body { padding:22px 24px; display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.card-body.cols3 { grid-template-columns:1fr 1fr 1fr; }
+.card-body.cols1 { grid-template-columns:1fr; }
+
+.c-green  .card-head { background:linear-gradient(135deg,var(--green),var(--green-l)); }
+.c-blue   .card-head { background:linear-gradient(135deg,var(--blue),var(--blue-l)); }
+.c-brown  .card-head { background:linear-gradient(135deg,var(--brown),var(--brown-l)); }
+.c-purple .card-head { background:linear-gradient(135deg,var(--purple),var(--purple-l)); }
+.c-orange .card-head { background:linear-gradient(135deg,var(--orange),var(--orange-l)); }
+
+.fg { display:flex; flex-direction:column; gap:5px; }
+.fg.full { grid-column:1/-1; }
+label { font-size:12.5px; font-weight:700; color:var(--dark); display:flex; align-items:center; gap:5px; }
+.req { color:var(--error); font-size:14px; }
+input,select,textarea {
+  width:100%; padding:10px 13px; border:1.5px solid var(--border);
+  border-radius:9px; font-family:'Cairo',sans-serif; font-size:13.5px;
+  color:var(--dark); background:var(--gray-l); transition:all .2s; outline:none;
+}
+input:focus,select:focus,textarea:focus {
+  border-color:#60a5fa; background:#fff; box-shadow:0 0 0 3px rgba(96,165,250,.15);
+}
+input.err,select.err,textarea.err { border-color:var(--error); background:#fff5f5; }
+.hint { font-size:11px; color:var(--gray); }
+.emsg { font-size:11.5px; color:var(--error); font-weight:700; display:none; }
+.emsg.show { display:block; }
+textarea { resize:vertical; min-height:72px; }
+
+.wa-row { display:flex; gap:8px; align-items:flex-start; }
+.wa-row select { width:110px; flex-shrink:0; }
+.wa-row input { flex:1; }
+
+.submit-wrap { text-align:center; padding-bottom:8px; }
+.btn {
+  background:linear-gradient(135deg,var(--green),var(--green-l));
+  color:#fff; border:none; padding:15px 52px; font-size:16px; font-weight:700;
+  font-family:'Cairo',sans-serif; border-radius:50px; cursor:pointer;
+  box-shadow:0 6px 24px rgba(26,61,107,.35); transition:all .25s;
+}
+.btn:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(26,61,107,.42); }
+.btn:disabled { opacity:.65; cursor:not-allowed; transform:none; }
+.btn .spin { display:none; width:16px; height:16px; border:3px solid rgba(255,255,255,.4);
+  border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite;
+  vertical-align:middle; margin-left:8px; }
+.btn.loading .spin { display:inline-block; }
+.btn.loading .btxt { display:none; }
+@keyframes sp { to { transform:rotate(360deg); } }
+
+.toast {
+  position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-130px);
+  padding:14px 26px; border-radius:12px; font-size:14px; font-weight:700;
+  font-family:'Cairo',sans-serif; z-index:9999; transition:transform .4s cubic-bezier(.175,.885,.32,1.275);
+  box-shadow:0 8px 28px rgba(0,0,0,.2); max-width:90vw; text-align:center;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.ok { background:var(--green); color:#fff; }
+.toast.fail { background:var(--error); color:#fff; }
+
+.note { background:#fffbeb; border:1px solid #fcd34d; border-radius:10px;
+  padding:12px 18px; font-size:12.5px; color:#92400e;
+  max-width:900px; margin:0 auto 4px; }
+
+@media(max-width:640px){
+  .card-body,.card-body.cols3 { grid-template-columns:1fr; }
+  h1 { font-size:20px; }
+  .btn { padding:13px 32px; font-size:14px; }
+}
+.camera-wrap {
+  border:2px dashed var(--border); border-radius:9px;
+  padding:22px 12px; text-align:center; background:var(--gray-l);
+  overflow:hidden; transition:border-color .15s,background .15s;
+}
+.camera-wrap.has-photo { border-color:#2a7a5a; background:#edf7f2; }
+.camera-wrap.err { border-color:var(--error) !important; }
+#cam-video {
+  width:100%; max-height:280px; border-radius:8px;
+  object-fit:cover; display:block; background:#000;
+}
+#cam-preview { width:100%; max-height:280px; object-fit:cover; border-radius:8px; display:block; }
+.cam-idle-icon { font-size:30px; margin-bottom:6px; display:block; }
+.cam-idle-text { font-size:13px; color:var(--gray); margin-bottom:8px; }
+.cam-controls { display:flex; justify-content:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+.cam-ok-label { color:#2a7a5a; font-weight:700; font-size:13px; line-height:2.2; }
+.cam-btn-open {
+  background:linear-gradient(135deg,var(--green),var(--green-l));
+  color:#fff; border:none; padding:11px 30px; border-radius:50px;
+  font-family:'Cairo',sans-serif; font-size:14px; font-weight:700; cursor:pointer;
+}
+.cam-btn-capture {
+  background:linear-gradient(135deg,#2a7a5a,#3a9a6a);
+  color:#fff; border:none; padding:11px 30px; border-radius:50px;
+  font-family:'Cairo',sans-serif; font-size:14px; font-weight:700; cursor:pointer;
+}
+.cam-btn-secondary {
+  background:#f3f4f6; color:#374151; border:1px solid var(--border);
+  padding:11px 20px; border-radius:50px;
+  font-family:'Cairo',sans-serif; font-size:13px; cursor:pointer;
+}
+/* ── نعم / لا ── */
+.yn-group { display:flex; gap:18px; align-items:center; margin-top:4px; }
+.yn-label { display:flex; align-items:center; gap:6px; font-size:14px; font-weight:600; cursor:pointer; }
+.yn-label input[type=radio] { width:18px; height:18px; accent-color:var(--green); margin:0; flex-shrink:0; padding:0; border:none; box-shadow:none; background:none; }
+/* ── بطاقات الإخوة ── */
+.sibling-card {
+  border:1px solid var(--border); border-radius:12px;
+  padding:16px 16px 12px; background:#fafafa;
+  position:relative; margin-bottom:12px;
+}
+.sibling-card-head {
+  font-size:13px; font-weight:700; color:var(--green);
+  border-right:3px solid var(--green); padding-right:8px;
+  margin-bottom:12px;
+}
+.sibling-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:640px){ .sibling-grid { grid-template-columns:1fr; } }
+.sibling-remove {
+  position:absolute; top:12px; left:12px;
+  background:#fee2e2; color:#dc2626; border:none;
+  border-radius:50%; width:26px; height:26px; font-size:13px;
+  cursor:pointer; line-height:26px; text-align:center; padding:0;
+}
+.sibling-add-btn {
+  width:100%; border:2px dashed var(--border); background:transparent;
+  padding:12px; border-radius:10px; font-family:'Cairo',sans-serif;
+  font-size:14px; color:var(--green); cursor:pointer; font-weight:700;
+  transition:all .2s; margin-top:4px;
+}
+.sibling-add-btn:hover { border-color:var(--green); background:var(--green-p); }
+/* ── شاشة فحص الهوية ── */
+#check-screen {
+  position:fixed; inset:0; z-index:700;
+  background:linear-gradient(160deg,#f0f3f7,#eef3fa,#f5f0fb);
+  display:flex; align-items:center; justify-content:center; padding:2rem;
+}
+.check-card {
+  background:#fff; border-radius:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.12);
+  padding:2.5rem 2rem; max-width:420px; width:100%;
+  text-align:center;
+  border-top:5px solid var(--green);
+}
+.check-card h2 { font-size:20px; font-weight:900; color:var(--green); margin-bottom:6px; }
+.check-card p  { font-size:13px; color:var(--gray); margin-bottom:22px; }
+.check-found {
+  background:#fff7ed; border:1px solid #fb923c; border-radius:12px;
+  padding:14px 16px; margin:16px 0; text-align:right;
+}
+.check-found .cf-title { font-size:14px; font-weight:700; color:#c2410c; margin-bottom:6px; }
+.check-found .cf-name  { font-size:15px; font-weight:900; color:var(--dark); }
+.check-actions { display:flex; gap:10px; margin-top:16px; flex-direction:column; }
+.check-btn-edit {
+  background:linear-gradient(135deg,var(--green),var(--green-l));
+  color:#fff; border:none; padding:13px; border-radius:50px;
+  font-family:'Cairo',sans-serif; font-size:14px; font-weight:700; cursor:pointer;
+  width:100%;
+}
+.check-btn-new {
+  background:#f3f4f6; color:#374151; border:1px solid var(--border);
+  padding:11px; border-radius:50px;
+  font-family:'Cairo',sans-serif; font-size:13px; cursor:pointer; width:100%;
+}
+.check-not-found {
+  background:#f0fdf4; border:1px solid #86efac; border-radius:10px;
+  padding:12px; margin:14px 0; font-size:13px; color:#15803d; font-weight:700;
+}
+#success-screen {
+  display:none; position:fixed; inset:0;
+  background:linear-gradient(160deg,#f0f3f7,#eef3fa,#f5f0fb);
+  z-index:500; align-items:center; justify-content:center; padding:2rem;
+}
+#success-screen.visible { display:flex; }
+.success-card {
+  background:#fff; border-radius:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.12);
+  padding:3rem 2.5rem; text-align:center;
+  max-width:420px; width:100%;
+  border-top:5px solid #2a7a5a;
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+  from { opacity:0; transform:scale(.85) translateY(20px); }
+  to { opacity:1; transform:scale(1) translateY(0); }
+}
+.success-icon { font-size:64px; margin-bottom:16px; }
+.success-title { font-size:22px; font-weight:900; color:#2a7a5a; margin-bottom:10px; }
+.success-subtitle { font-size:14px; color:#6b7280; margin-bottom:28px; }
+.new-form-btn {
+  background:linear-gradient(135deg,var(--green),var(--green-l));
+  color:#fff; border:none; padding:14px 40px;
+  font-size:15px; font-weight:700;
+  font-family:'Cairo',sans-serif; border-radius:50px;
+  cursor:pointer; width:100%;
+  box-shadow:0 4px 16px rgba(26,61,107,.25);
+  transition:all .25s;
+}
+.new-form-btn:hover { transform:translateY(-2px); }
+.consent-wrap {
+  max-width:900px; margin:0 auto 4px;
+  background:#fff; border-radius:14px; padding:18px 22px;
+  border:2px solid var(--border); display:flex; align-items:flex-start; gap:12px;
+  cursor:pointer; transition:border-color .2s;
+}
+.consent-wrap:hover { border-color:#2563ab; }
+.consent-wrap.err-consent { border-color:var(--error); background:#fff5f5; }
+.consent-wrap input[type=checkbox] {
+  width:20px; height:20px; flex-shrink:0; margin-top:2px;
+  accent-color:#1a3d6b; cursor:pointer;
+  background:none; border:none; box-shadow:none; padding:0;
+}
+.consent-text { font-size:13px; font-weight:600; color:var(--dark); line-height:1.7; }
+.consent-err { font-size:12px; color:var(--error); font-weight:700; display:none; margin:4px 0 0 34px; }
+.consent-err.show { display:block; }
+
+.opts { display:flex; flex-wrap:wrap; gap:8px 20px; margin-top:4px; }
+.opt { display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; cursor:pointer; }
+.opt input { width:18px; height:18px; accent-color:var(--green); margin:0; padding:0; border:none; box-shadow:none; background:none; flex-shrink:0; }
+.opts.err { outline:1.5px solid var(--error); border-radius:9px; padding:8px; background:#fff5f5; }
+.fg.hidden { display:none; }
+.logos { display:flex; justify-content:center; align-items:center; gap:28px; flex-wrap:wrap; margin-bottom:8px; }
+.logos img { height:120px; width:auto; max-width:46vw; object-fit:contain; }
+.org { font-size:13px; color:var(--gray); margin-bottom:6px; }
+.q-hint { font-size:11px; color:var(--gray); }
+
+</style>
+</head>
+<body>
+<div id="success-screen">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <div class="success-title">تم إرسال البيانات بنجاح!</div>
+    <div class="success-subtitle">شكراً، تم استلام الاستمارة.</div>
+    <button class="new-form-btn" onclick="resetForm()">📝 إرسال استمارة أخرى</button>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="logos">
+    <img src="logo.png" alt="">
+    <img src="logo2.png" alt="">
+  </div>
+  <div class="org">جمعية فلسطين الغد للتنمية المجتمعية</div>
+  <h1>استمارة PDM للحقيبة المدرسية والقرطاسية</h1>
+  <p class="subtitle">متابعة ما بعد التوزيع (Post Distribution Monitoring)</p>
+  <div class="divider"></div>
+</div>
+
+<div class="note">⚠️ الحقول المعلّمة بـ <span style="color:red;font-weight:700">*</span> إلزامية. تحقق من الإجابات قبل الإرسال.</div>
+
+<form id="frm" novalidate>
+  <div id="cards"></div>
+  <div class="submit-wrap">
+    <button type="submit" class="btn" id="submit-btn"><span class="spin"></span><span class="btxt">📤 إرسال الاستمارة</span></button>
+  </div>
+</form>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzr_LVVtwdgZxW_j2bWRFnHfsJMpcmMVhQ5qmFYGPmKhDDlpM0mqNS8wDNbu2CgR8Ig/exec';
+const FORM_ID = 'school';
+const SECTIONS = [{"ico": "📋", "title": "البيانات الأساسية", "cls": "c-green", "qs": [{"key": "كود_الطفل", "t": "text", "label": "كود الطفل/ة", "req": true}, {"key": "تاريخ_المقابلة", "t": "date", "label": "تاريخ المقابلة", "req": true, "today": true}, {"key": "العمر", "t": "number", "label": "العمر (بالسنوات)", "req": true, "min": 3, "max": 18}, {"key": "الجنس", "t": "radio", "label": "الجنس", "req": true, "opts": ["ذكر", "أنثى"]}, {"key": "اسم_الخيمة_أو_النقطة", "t": "text", "label": "اسم الخيمة/النقطة التعليمية", "req": true}, {"key": "الصف", "t": "text", "label": "الصف", "req": true}, {"key": "اسم_الباحث", "t": "text", "label": "اسم الباحث/ة", "req": true}, {"key": "هل_يجيب_بنفسه", "t": "radio", "label": "هل يجيب الطفل بنفسه؟", "req": true, "opts": ["نعم", "بمساعدة مقدم/ة الرعاية"]}]}, {"ico": "🎒", "title": "أولاً: استلام الحقيبة المدرسية/القرطاسية", "cls": "c-blue", "qs": [{"key": "هل_استلم_الحقيبة", "t": "radio", "label": "1. هل استلمت الحقيبة المدرسية و/أو القرطاسية المخصصة لك؟", "req": true, "opts": ["نعم", "لا"]}, {"key": "المواد_كاملة", "t": "radio", "label": "2. هل كانت المواد التي استلمتها كاملة حسب ما تم إبلاغك به؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"], "show": [{"k": "هل_استلم_الحقيبة", "op": "eq", "v": "نعم"}]}, {"key": "مناسبة_للاحتياجات", "t": "radio", "label": "3. هل كانت الحقيبة والقرطاسية مناسبة لاحتياجاتك المدرسية؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"], "show": [{"k": "هل_استلم_الحقيبة", "op": "eq", "v": "نعم"}]}, {"key": "حالة_المواد", "t": "radio", "label": "4. هل كانت الحقيبة والمواد المدرسية بحالة جيدة عند استلامها؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"], "show": [{"k": "هل_استلم_الحقيبة", "op": "eq", "v": "نعم"}]}, {"key": "مواد_ناقصة", "t": "textarea", "label": "إذا كانت هناك مواد ناقصة أو غير مناسبة، اذكرها", "req": false, "show": [{"k": "هل_استلم_الحقيبة", "op": "eq", "v": "نعم"}]}]}, {"ico": "😊", "title": "ثانياً: الاستفادة والرضا", "cls": "c-brown", "qs": [{"key": "المشاركة_بالأنشطة", "t": "radio", "label": "5. هل تساعدك الحقيبة والقرطاسية التي استلمتها على المشاركة في الأنشطة والدروس؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"], "show": [{"k": "هل_استلم_الحقيبة", "op": "eq", "v": "نعم"}]}, {"key": "الرضا_العام", "t": "radio", "label": "6. ما مدى رضاك بشكل عام عن الحقيبة المدرسية والقرطاسية؟", "req": true, "opts": ["راضٍ/راضية", "راضٍ/راضية إلى حد ما", "غير راضٍ/راضية"], "show": [{"k": "هل_استلم_الحقيبة", "op": "eq", "v": "نعم"}]}, {"key": "الأمان_والراحة", "t": "radio", "label": "7. هل شعرت بالأمان والراحة أثناء استلام الحقيبة/القرطاسية؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"]}, {"key": "احترام_الفريق", "t": "radio", "label": "8. هل تعامل معك فريق التوزيع باحترام أثناء عملية الاستلام؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"]}, {"key": "وضوح_المعلومات", "t": "radio", "label": "9. هل كانت المعلومات المتعلقة بموعد ومكان وطريقة الاستلام واضحة لك ولأسرتك؟", "req": true, "opts": ["نعم", "إلى حد ما", "لا"]}, {"key": "ملاحظات_إضافية", "t": "textarea", "label": "ملاحظات إضافية", "req": false}]}, {"ico": "💬", "title": "ثالثاً: ملاحظات الطفل/ة", "cls": "c-purple", "qs": [{"key": "أكثر_شيء_أعجبه", "t": "textarea", "label": "10. ما أكثر شيء أعجبك في الحقيبة المدرسية/القرطاسية؟", "req": false}, {"key": "شيء_تمنى_وجوده", "t": "textarea", "label": "11. هل هناك شيء كنت تتمنى وجوده في الحقيبة أو القرطاسية ولم يكن موجودًا؟", "req": false}, {"key": "اقتراح_للتحسين", "t": "textarea", "label": "12. هل لديك أي اقتراح لتحسين الحقيبة المدرسية أو عملية التوزيع في المرات القادمة؟", "req": false}]}];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const QS = SECTIONS.flatMap(s => s.qs);
+const byKey = Object.fromEntries(QS.map(q => [q.key, q]));
+
+// ── بناء الصفحة ──
+function render() {
+  $('cards').innerHTML = SECTIONS.map(s => `
+  <div class="card ${s.cls}" style="margin-bottom:24px">
+    <div class="card-head"><span class="ico">${s.ico}</span><span class="ttl">${esc(s.title)}</span></div>
+    <div class="card-body">${s.qs.map(fieldHtml).join('')}</div>
+  </div>`).join('');
+}
+
+function fieldHtml(q) {
+  const star = q.req ? ' <span class="req">*</span>' : '';
+  let ctl = '';
+  if (q.t === 'text') ctl = `<input type="text" id="${q.key}" ${q.pat==='nid'?'maxlength="9" inputmode="numeric"':''}>`;
+  else if (q.t === 'textarea') ctl = `<textarea id="${q.key}"></textarea>`;
+  else if (q.t === 'date') ctl = `<input type="date" id="${q.key}" ${q.today?'max="'+new Date().toISOString().split('T')[0]+'"':''}>`;
+  else if (q.t === 'number') ctl = `<input type="number" id="${q.key}" inputmode="numeric" ${q.min!=null?'min="'+q.min+'"':''} ${q.max!=null?'max="'+q.max+'"':''}>`;
+  else ctl = `<div class="opts" id="${q.key}">` + q.opts.map((o,i) =>
+      `<label class="opt"><input type="${q.t==='radio'?'radio':'checkbox'}" name="${q.key}" value="${esc(o)}">${esc(o)}</label>`).join('') + `</div>`;
+  const wide = (q.t === 'textarea' || q.t === 'multi' || q.t === 'radio' && q.label.length > 40 || q.full) ? ' full' : '';
+  return `<div class="fg${wide}" id="fg_${q.key}">
+      <label>${esc(q.label)}${star}</label>${ctl}
+      ${q.hint ? `<span class="hint">${esc(q.hint)}</span>` : ''}
+      <span class="emsg" id="e_${q.key}">⚠ <span class="m">هذا الحقل مطلوب</span></span>
+    </div>`;
+}
+
+// ── القيم ──
+function getVal(key) {
+  const q = byKey[key];
+  if (q.t === 'radio') { const c = document.querySelector(`input[name="${key}"]:checked`); return c ? c.value : ''; }
+  if (q.t === 'multi') return [...document.querySelectorAll(`input[name="${key}"]:checked`)].map(c => c.value);
+  return $(key).value.trim();
+}
+
+// ── شروط الظهور ──
+function isShown(q) {
+  return !q.show || q.show.every(c => {
+    if (!isShown(byKey[c.k])) return false;
+    const v = getVal(c.k);
+    if (c.op === 'eq') return v === c.v;
+    if (c.op === 'ne') return v !== '' && v !== c.v;      // لا تظهر قبل الإجابة
+    if (c.op === 'has') return Array.isArray(v) && v.includes(c.v);
+    return true;
+  });
+}
+function refresh() { QS.forEach(q => $('fg_' + q.key).classList.toggle('hidden', !isShown(q))); }
+
+// ── التحقق ──
+function fail(q, msg) {
+  const el = $('e_' + q.key);
+  el.querySelector('.m').textContent = msg || 'هذا الحقل مطلوب';
+  el.classList.add('show');
+  const c = $(q.key); c.classList.add('err');
+  return false;
+}
+function clearErr() {
+  document.querySelectorAll('.emsg.show').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('.err').forEach(e => e.classList.remove('err'));
+}
+function validate() {
+  clearErr();
+  const today = new Date().toISOString().split('T')[0];
+  let ok = true;
+  QS.forEach(q => {
+    if (!isShown(q)) return;
+    const v = getVal(q.key);
+    const empty = Array.isArray(v) ? v.length === 0 : v === '';
+    if (empty) { if (q.req) ok = fail(q) && ok; return; }
+    if (q.pat === 'nid' && !/^\d{9}$/.test(v)) ok = fail(q, 'يجب أن يكون 9 أرقام') && ok;
+    if (q.t === 'date' && q.today && v > today) ok = fail(q, 'التاريخ لا يمكن أن يكون في المستقبل') && ok;
+    if (q.t === 'number') {
+      const n = Number(v);
+      if (!Number.isFinite(n) || (q.min != null && n < q.min) || (q.max != null && n > q.max))
+        ok = fail(q, `القيمة يجب أن تكون بين ${q.min} و ${q.max}`) && ok;
+    }
+  });
+  return ok;
+}
+
+function toast(msg, type) {
+  const t = $('toast');
+  t.textContent = (type === 'ok' ? '✅ ' : '❌ ') + msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+// ── الإرسال ──
+$('frm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!validate()) {
+    toast('يرجى تصحيح الأخطاء أولاً', 'fail');
+    document.querySelector('.err')?.scrollIntoView({behavior: 'smooth', block: 'center'});
+    return;
+  }
+  if (!/^https:\/\/script\.google\.com\//.test(SCRIPT_URL)) { toast('لم يتم ضبط رابط Google Script بعد', 'fail'); return; }
+  const data = {};
+  QS.forEach(q => {
+    const v = isShown(q) ? getVal(q.key) : '';          // الحقول المخفية تُرسل فارغة
+    data[q.key] = Array.isArray(v) ? v.join('، ') : v;
+  });
+  data['رقم_المرجع'] = 'PDM-' + FORM_ID.toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+  const btn = $('submit-btn');
+  btn.disabled = true; btn.classList.add('loading');
+  try {
+    await fetch(SCRIPT_URL, {method: 'POST', body: JSON.stringify(data), headers: {'Content-Type': 'application/json'}, mode: 'no-cors'});
+    $('success-screen').classList.add('visible');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } catch (err) {
+    toast('حدث خطأ في الاتصال، حاول مجدداً', 'fail');
+  }
+  btn.disabled = false; btn.classList.remove('loading');
+});
+
+function resetForm() {
+  $('success-screen').classList.remove('visible');
+  $('frm').reset(); setDefaults(); refresh(); clearErr();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function setDefaults() {
+  const t = new Date().toISOString().split('T')[0];
+  QS.forEach(q => { if (q.t === 'date' && q.today) $(q.key).value = t; });
+}
+$('frm').addEventListener('input', e => {
+  if (e.target.inputMode === 'numeric' && e.target.type === 'text') e.target.value = e.target.value.replace(/\D/g, '');
+  refresh();
+});
+$('frm').addEventListener('change', refresh);
+render(); setDefaults(); refresh();
+</script>
+</body>
+</html>
